@@ -1,111 +1,86 @@
 import { useEffect, useState } from "react";
-import { Card, Badge, Row } from "react-bootstrap";
-
+import CardDetails from "./CardDetails";
 function DishDetails(props) {
-  const [mealFinal, setMealFinal] = useState([]);
-  const [ingredient, setInd] = useState([]);
-  const [check, setCheck] = useState([]);
+  const [meal, setMeal] = useState([]);
+  const [ingredient, setIngredient] = useState([]);
+  const [tags, setTags] = useState([]);
   useEffect(() => {
-    setMealFinal(props.meal);
-    getId();
+    setMeal(props.meal);
   }, [props.meal]);
+  useEffect(() => {
+    getIngredientList();
+    getTags();
+  }, [meal]);
 
-  function getId() {
-    console.log("function called: ", mealFinal);
-    if (mealFinal.length === 0) {
+  function getTags() {
+    if (meal.length === 0) return;
+    let tag = meal[0]["strTags"]
+    if(tag===null){
+      // console.log("this is null tag")
+      tag=[]
+    }else{
+      tag=tag.split(",");
+    }
+    // console.log("tags are: ",tag)
+    setTags(tag);
+  }
+  function filterFunction(key) {
+    if (key.startsWith("strIngredient") && meal[0][key]) {
+      return true;
+    }
+  }
+
+  function getIngredientList() {
+    // console.log("function called: ", meal);
+    if (meal.length === 0) {
       return;
     }
-    let temp = Object.keys(mealFinal[0]).filter((key) => {
-      if (
-        key.startsWith("strIngredient") &&
-        mealFinal[0][key] &&
-        mealFinal[0][key] !== ""
-      ) {
-        var value = mealFinal[0][key];
-        const obj = { id: mealFinal[0][key], md: value };
-        console.log(obj);
-        setCheck([...check, obj]);
-        return <div>{value}</div>;
+    const tag = meal[0]["strTags"];
+    // console.log("tag: ", tag);
+    let temp = Object.keys(meal[0]).map((key) => {
+      if (filterFunction(key)) {
+        const ingredientName = meal[0][key];
+        const ingredientNumber = onlyNumbers(key);
+        const keyMeasure = "strMeasure" + ingredientNumber;
+        const ingredientMeasure = meal[0][keyMeasure];
+        const obj = { item: ingredientName, measure: ingredientMeasure };
+        return obj;
       }
     });
-    console.log("inside getId: ", temp);
-    setInd(temp);
+    // console.log(temp);
+    const temp2 = temp.filter((item) => {
+      return item;
+    });
+    // console.log("this is temp : ", temp2);
+    setIngredient(temp2);
   }
 
   function onlyNumbers(text) {
-    return text.replace(/\D/g, "");
+    // console.log("this is inside", text.replace(/strIngredient|/, ""), text);
+    return text.replace(/strIngredient|/, "");
   }
 
-  if (mealFinal === null || mealFinal.length === 0) {
+  if (meal === null || meal.length === 0) {
     return (
       <div>
         <h1>loading....</h1>
       </div>
     );
-  } else {
-    return (
-      <Card xs="auto" variant="outline-dark" className="d-flex">
-        <Card.Title style={{ display: "inline" }}>
-          <h1 style={{ textDecoration: "underline" }}>
-            {mealFinal[0].strMeal}
-          </h1>
-          <span>
-            Category: <Badge bg="success">{mealFinal[0].strCategory}</Badge>{" "}
-          </span>{" "}
-        </Card.Title>
-
-        <Card.Img
-          style={{ width: "20%", paddingBottom: "3%" }}
-          src={mealFinal[0].strMealThumb}
-        ></Card.Img>
-
-        <Card.Text>
-          <>
-            <h4>
-              <a href={mealFinal[0].strYoutube}>
-                <Badge bg="danger">{"Youtube "}</Badge>
-              </a>
-              <a style={{ margin: "20px" }} href={mealFinal[0].strSource}>
-                <Badge bg="dark">{"Source "}</Badge>
-              </a>
-            </h4>
-            <>
-              <h3>
-                  <h2>Instruction: </h2>
-                <pre style={{overflow:"hidden"}}>{mealFinal[0].strInstructions}</pre>
-              </h3>
-            </>
-          </>
-        </Card.Text>
-        <h3>
-          <Badge>{"Ingredient"}</Badge>{" "}
-        </h3>
-        <span style={{ marginTop: "50px" }}>
-          {ingredient.map((item) => {
-            console.log("key", item);
-            console.log(check);
-            console.log(onlyNumbers(item));
-            return (
-              <Badge
-                pill
-                bg="dark"
-                style={{
-                  padding: "6px 15px 3px 15px",
-                  margin: "0px 10px 10px 0px",
-                }}
-              >
-                <h6>
-                  {mealFinal[0][item] +
-                    " : " +
-                    mealFinal[0]["strMeasure" + onlyNumbers(item)]}
-                </h6>
-              </Badge>
-            );
-          })}
-        </span>
-      </Card>
-    );
   }
+
+  return (
+
+    <CardDetails
+      title={meal[0].strMeal}
+      category={meal[0].strCategory}
+      thumbNail={meal[0].strMealThumb}
+      youtube={meal[0].strYoutube}
+      source={meal[0].strSource}
+      instruction={meal[0].strInstructions}
+      ingredient={ingredient}
+      tags={tags}
+    />
+  );
 }
 
 export default DishDetails;

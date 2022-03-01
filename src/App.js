@@ -11,20 +11,25 @@ import "./App.css";
 import { BrowserRouter, Link, Routes, Route } from "react-router-dom";
 import DishesList from "./component/DishesList";
 import DishDetails from "./component/DishDetails";
+
 function App() {
+
   const [dishesArray, setDishesArray] = useState([]);
   const [name, setName] = useState("");
   const [selectedDish, setSelectedDish] = useState(null);
   const [display, setDisplay] = useState("none");
+
   useEffect(() => {
     selectedDish ? setDisplay("block") : setDisplay("none");
   }, [selectedDish]);
+
   const fetchDishes = (name) => {
     setDisplay('none')
     fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${name}`)
       .then((res) => res.json())
       .then((response) => setDishesArray(response.meals));
   };
+
   const shuffleData = () => {
     fetch("https://www.themealdb.com/api/json/v1/1/random.php")
       .then((res) => res.json())
@@ -34,14 +39,15 @@ function App() {
       });
     setDisplay("none");
   };
-  console.log(dishesArray)
-  // useEffect(fetchDishes, [name]);
+
   return (
     <BrowserRouter>
+
       <Container>
 
         <Row xs={12} style={{ padding:"20px"}}>
         <Col md={3} > <h1>Meal Finder</h1></Col>
+
           <Col >
           <InputGroup
             style={{width:"55%", paddingTop:"6px"}}
@@ -61,6 +67,7 @@ function App() {
             
            
             <Link to="/dishesList">
+
               <Button
                 disabled={name.length?false:true}
                 variant="outline-dark"
@@ -87,6 +94,7 @@ function App() {
           
         </Row>
         <Routes>
+
           <Route
             path="/dishesList"
             element={
@@ -96,20 +104,24 @@ function App() {
               />
             }
           ></Route>
+
           <Route
             path="/dishDetails"
             element={<DishDetails meal={dishesArray} />}
           />
         </Routes>
         <div style={{ display: display }}>
+
           {display === "none" ? (
             <div></div>
           ) : (
             <DishDetails meal={[selectedDish]} />
           )}
+          
         </div>
-        {/* <DishesList dishes={dishesArray} /> */}
+
       </Container>
+
     </BrowserRouter>
   );
 }

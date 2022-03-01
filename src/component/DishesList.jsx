@@ -6,7 +6,7 @@ function DishesList(props){
     // console.log(props)
     if(!arr){
         return(
-            <></>
+            <h1>No result found....</h1>
         )
     }
     return(
